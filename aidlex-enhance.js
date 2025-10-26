@@ -1,30 +1,53 @@
-/** Aidlex Enhancer: guided intake, categories, exit, copy, female-like TTS **/
+/** Aidlex Enhancer v2: centered chat, categories, no auto-close, selective tools, female-ish TTS **/
 (function(){
-  // ---- DOM scaffolding (non-destructive overlay) ----
-  const shell = el('div',{id:'alx-shell'}); document.body.appendChild(shell);
-  const exit = el('button',{id:'alx-exit',text:'Exit → Home'}); shell.appendChild(exit);
-  const home = el('div',{id:'alx-home'}); shell.appendChild(home);
+  // -------- Safe container under hero --------
+  const wrap = document.getElementById('alx-wrap') || (()=> {
+    const w = document.createElement('section'); w.id='alx-wrap';
+    // try to place below "Get Started" hero if present, else end of body
+    const startBtn = findStartButton();
+    if(startBtn && startBtn.parentElement) startBtn.parentElement.after(w); else document.body.appendChild(w);
+    return w;
+  })();
 
-  const card = el('div',{class:'alx-card'}); home.appendChild(card);
+  const messages = document.getElementById('alx-messages') || (()=> {
+    const m = document.createElement('div'); m.id='alx-messages'; wrap.appendChild(m); return m;
+  })();
+
+  const inputRow = document.getElementById('alx-inputRow') || (()=> {
+    const r = document.createElement('div'); r.id='alx-inputRow';
+    const ta = document.createElement('textarea'); ta.id='alx-input'; ta.rows=2; ta.placeholder='Type here…';
+    const send = document.createElement('button'); send.id='alx-send'; send.className='alx-btn'; send.textContent='Send';
+    r.append(ta, send); wrap.appendChild(r); return r;
+  })();
+  const input = document.getElementById('alx-input');
+  const send  = document.getElementById('alx-send');
+
+  // hide any stray old single-line inputs near hero
+  hideLegacyInputs();
+
+  // -------- Overlay shell (Exit + Categories Home) --------
+  const shell = ensure('div','alx-shell'); document.body.appendChild(shell);
+  const exit  = ensure('button','alx-exit'); exit.textContent='Exit → Home'; shell.appendChild(exit);
+  const home  = ensure('div','alx-home'); shell.appendChild(home);
+
+  const card  = el('div',{class:'alx-card'}); home.appendChild(card);
   card.appendChild(el('h3',{class:'alx-title',text:'Aidlex – Quick Start'}));
   card.appendChild(el('p',{class:'alx-sub',text:'Choose a category to begin a short interview. No session will auto-close.'}));
 
-  const grid = el('div',{class:'alx-grid'}); card.appendChild(grid);
+  const grid  = el('div',{class:'alx-grid'}); card.appendChild(grid);
 
-  // ---- Curated categories (short & clear) ----
+  // Categories (concise)
   const CATS = [
-    { h:'MOHRE (Labour)', s:['Salary delay','Absconding / Ban','Unpaid EOS','Labour complaint','Offer/Contract issues'] },
-    { h:'Tenancy & Real Estate', s:['Eviction / Notice','Rent increase','Security deposit','Maintenance dispute','Ejari / Tawtheeq'] },
-    { h:'Courts & Notary', s:['Notary attest','Payment order','Civil claim','Cheque case','Execution steps'] },
-    { h:'DED / Economic', s:['Trade licence','Name reservation','Fines & appeals','Partner disputes','Consumer complaint'] },
-    { h:'Municipality', s:['Fines & appeals','Shop permits','Closure notice','Health violations','Inspection response'] },
-    { h:'Traffic & Fines', s:['RTA/ITC fines','Black points','Accident report','Salik/Darb','Objection/Appeal'] },
+    { h:'MOHRE (Labour)', s:['Salary delay','Absconding/Ban','Unpaid EOS','Complaint','Contract issues'] },
+    { h:'Tenancy & Real Estate', s:['Eviction','Rent increase','Deposit','Maintenance','Ejari/Tawtheeq'] },
+    { h:'Courts & Notary', s:['Notary attest','Payment order','Civil claim','Cheque','Execution'] },
+    { h:'DED / Economic', s:['Trade licence','Name reservation','Fines/Appeals','Partner dispute','Consumer complaint'] },
+    { h:'Municipality', s:['Fines/Appeals','Permits','Closure notice','Health violations','Inspection response'] },
+    { h:'Traffic & Fines', s:['RTA/ITC fines','Black points','Accident','Salik/Darb','Objection/Appeal'] },
     { h:'ICP / Immigration', s:['Visa status','Overstay','Entry permit','Golden visa','Resident services'] },
     { h:'TAMM / Amer', s:['Family visa','Status change','Medical/ID','Cancellation','Travel permit'] },
     { h:'Letters & Translation', s:['Request letter','Complaint letter','Undertaking','Arabic ↔ English','Custom format'] }
   ];
-
-  // build grid
   CATS.forEach(cat=>{
     const chip = el('div',{class:'alx-chip'});
     chip.appendChild(el('div',{text:cat.h,style:'font-weight:600'}));
@@ -33,78 +56,72 @@
     grid.appendChild(chip);
   });
 
-  // ---- Chat hooks (augment existing page) ----
-  // Create message container if page doesn’t have one
-  const host = document.querySelector('#messages') || document.body;
-  function addMsg(text, role='assistant'){
-    const m = el('div',{class:`alx-msg ${role==='user'?'alx-user':''}`}); 
-    m.textContent = text; host.appendChild(m);
-    if(role==='assistant'){ m.appendChild(toolbar(text)); }
-    scrollToBottom();
+  // Hook “Get Started” button if present to open categories
+  const startBtn = findStartButton();
+  startBtn?.addEventListener('click', (e)=>{ e.preventDefault(); showHome(); });
+
+  // Exit shows home (no auto-close ever)
+  exit.onclick = showHome;
+
+  // -------- Chat helpers --------
+  function addMsg(text, role='assistant', opts={tools:false}) {
+    const b = el('div',{class:`alx-msg ${role==='user'?'alx-user':''}`}); b.textContent = text;
+    messages.appendChild(b);
+    if (role==='assistant' && opts.tools) b.appendChild(toolbar(text));
+    messages.scrollTop = messages.scrollHeight;
   }
+
   function toolbar(text){
     const tb = el('div',{class:'alx-toolbar'});
-    const copy = btn('Copy', ()=> navigator.clipboard.writeText(text));
-    const speak = btn('Read aloud', ()=> ttsSpeak(text));
-    tb.append(copy,speak); return tb;
+    tb.append(btn('Copy', ()=> navigator.clipboard.writeText(text)),
+              btn('Read aloud', ()=> ttsSpeak(text)));
+    return tb;
   }
-  function btn(label,fn){ const b=el('button',{class:'alx-btn',text:label}); b.onclick=fn; return b;}
-  function scrollToBottom(){ host.scrollTop = host.scrollHeight; }
+  function btn(label,fn){ const b=el('button',{class:'alx-btn',text:label}); b.onclick=fn; return b; }
 
-  // ---- Intake engine (guided interview) ----
-  let answers={}, idx=0, active=false;
+  // -------- Intake flow --------
+  let active=false, idx=0, answers={};
   const Q = [
-    {k:'issue_type', t:(p)=>`Starting: ${p}. In one line, what is the specific issue?`},
-    {k:'what_happened', t:'What happened? Please describe the situation in your own words.'},
-    {k:'dates', t:'When did it occur? Share any key dates or notices.'},
-    {k:'parties', t:'Who is involved? (You, other party/company, authority)'},
-    {k:'documents', t:'Do you have any documents (contracts/notices/emails)? List briefly.'},
-    {k:'location', t:'Which emirate/authority applies? (e.g., Abu Dhabi – ADJD/MOHRE; Dubai – Courts/MOHRE/DED)'},
-    {k:'urgency', t:'How urgent is this? (none / this week / today)'},
-    {k:'outcome', t:'What outcome do you want now? (draft letter / complaint / negotiation / appeal)'},
-    {k:'deadline', t:'Any fixed deadline/hearing date? If none, say "none".'},
-    {k:'contact', t:'If you want a callback, share email/phone (optional).'}
+    {k:'issue_type',   t:(p)=>`Starting: ${p}. In one line, what is the specific issue?`},
+    {k:'what_happened',t:'What happened? Please describe the situation in your own words.'},
+    {k:'dates',        t:'When did it occur? Share key dates or notices.'},
+    {k:'parties',      t:'Who is involved? (You, other party/company, authority)'},
+    {k:'documents',    t:'Do you have documents (contracts/notices/emails)? List briefly.'},
+    {k:'location',     t:'Which emirate/authority applies? (e.g., Abu Dhabi – ADJD/MOHRE; Dubai – Courts/MOHRE/DED)'},
+    {k:'urgency',      t:'How urgent is this? (none / this week / today)'},
+    {k:'outcome',      t:'What outcome do you want now? (draft letter / complaint / negotiation / appeal)'},
+    {k:'deadline',     t:'Any fixed deadline/hearing date? If none, say "none".'},
+    {k:'contact',      t:'If you want a callback, share email/phone (optional).'}
   ];
 
-  // Attach to existing input if present; otherwise add minimal input
-  let input = document.querySelector('#chatInput');
-  let send  = document.querySelector('#sendBtn');
-  if(!input){ input = el('textarea',{id:'chatInput',style:'width:100%;margin-top:8px',rows:2}); host.appendChild(input); }
-  if(!send){  send  = el('button',{id:'sendBtn',class:'alx-btn',text:'Send'}); host.appendChild(send); }
-
-  send.addEventListener('click', onSend);
-  input.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); onSend(); }});
-
   function startIntake(picked){
-    active=true; answers={}; idx=0;
-    addMsg("I'll ask a few quick questions to tailor the guidance.",'assistant');
+    active=true; idx=0; answers={};
+    addMsg("I'll ask a few quick questions to tailor the guidance.",'assistant', {tools:false});
     askNext(picked);
   }
   function askNext(picked){
-    if(idx===0 && picked){ addMsg(typeof Q[0].t==='function'?Q[0].t(picked):Q[0].t,'assistant'); return; }
-    if(idx<Q.length){ addMsg(typeof Q[idx].t==='function'?Q[idx].t(picked):Q[idx].t,'assistant'); }
+    if(idx===0 && picked){ addMsg(fnText(Q[0].t,picked),'assistant',{tools:false}); return; }
+    if(idx<Q.length){ addMsg(fnText(Q[idx].t,picked),'assistant',{tools:false}); }
     else{
       active=false;
       const summary = buildSummary(answers);
-      addMsg("Thanks. Preparing your guidance…",'assistant');
-      callAgent(summary).then(r=>{
-        addMsg(r || "Received.",'assistant');
+      addMsg('Thanks. Preparing your guidance…','assistant',{tools:false});
+      callAgent(summary).then(reply=>{
+        addMsg(reply || 'I returned a response.','assistant',{tools:true}); // tools only on agent output
         renderEndActions();
       }).catch(e=>{
-        addMsg("Error: "+e,'assistant'); renderEndActions();
+        addMsg('Error: '+e,'assistant',{tools:false}); renderEndActions();
       });
     }
   }
   function onSend(){
-    const t = input.value.trim(); if(!t) return; input.value='';
-    addMsg(t,'user');
-    if(active){
-      const key = Q[idx].k; answers[key]=t; idx++; askNext();
-    }else{
-      // Chat continues with agent (no auto close)
-      callAgent(t).then(r=> addMsg(r,'assistant'));
-    }
+    const t = input.value.trim(); if(!t) return; input.value=''; addMsg(t,'user',{tools:false});
+    if(active){ answers[Q[idx].k]=t; idx++; askNext(); }
+    else{ callAgent(t).then(r=> addMsg(r,'assistant',{tools:true})); }
   }
+  send.addEventListener('click', onSend);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); onSend(); }});
+
   function buildSummary(a){
     return [
       'USER INTAKE SUMMARY',
@@ -122,59 +139,56 @@
   }
 
   function renderEndActions(){
-    const wrap = el('div',{class:'alx-toolbar'});
-    wrap.append(
-      btn('Book appointment', ()=> addMsg('Please share a preferred time and your contact.','assistant')),
+    const w = el('div',{class:'alx-toolbar'});
+    w.append(
+      btn('Book appointment', ()=> addMsg('Please share a preferred time and your contact.','assistant',{tools:false})),
       btn('New case', ()=> { showHome(); startIntakePrompt(); }),
       btn('Exit → Home', ()=> showHome())
     );
-    host.appendChild(wrap); scrollToBottom();
+    messages.appendChild(w); messages.scrollTop = messages.scrollHeight;
   }
 
-  // ---- Home show/hide + Exit ----
+  // -------- Home overlay --------
   function showHome(){ home.style.display='flex'; }
   function hideHome(){ home.style.display='none'; }
-  exit.onclick = showHome; // never auto-close
   function startIntakePrompt(){ hideHome(); startIntake('New case'); }
+  // show categories only when user clicks "Get Started"
+  // (no auto-open)
 
-  // open home at first render
-  showHome();
-
-  // ---- Copy + TTS (female-ish) ----
+  // -------- TTS (female-ish) --------
   function ttsSpeak(text){
     try{
       const synth = window.speechSynthesis; if(!synth) return alert('Speech not supported.');
-      const utter = new SpeechSynthesisUtterance(text);
-      // pick a female-sounding English voice if available
-      const pick = (voices)=>{
-        const pref = voices.find(v=>/female/i.test(v.name))
-                  || voices.find(v=>/Google UK English Female|Samantha|Victoria|Joanna|Amy/i.test(v.name))
-                  || voices.find(v=>/^en[-_]/i.test(v.lang))
-                  || voices[0];
-        return pref;
-      };
-      const apply = ()=>{ const v = pick(speechSynthesis.getVoices()); if(v) utter.voice=v; synth.speak(utter); };
-      utter.rate = 0.96; utter.pitch = 1.1; // warmer female tone
-      if(speechSynthesis.getVoices().length){ apply(); } else {
-        speechSynthesis.onvoiceschanged = apply;
-      }
+      const u = new SpeechSynthesisUtterance(text);
+      const choose = (voices)=> voices.find(v=>/female/i.test(v.name))
+        || voices.find(v=>/Google UK English Female|Samantha|Victoria|Joanna|Amy/i.test(v.name))
+        || voices.find(v=>/^en[-_]/i.test(v.lang)) || voices[0];
+      const apply = ()=>{ const v = choose(speechSynthesis.getVoices()); if(v) u.voice=v; synth.speak(u); };
+      u.rate=0.96; u.pitch=1.1;
+      if(speechSynthesis.getVoices().length){ apply(); } else { speechSynthesis.onvoiceschanged = apply; }
     }catch(e){ console.error(e); }
   }
 
-  // ---- Backend call (Netlify Function) ----
+  // -------- Backend call --------
   async function callAgent(message){
     const r = await fetch('/.netlify/functions/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
     const data = await r.json().catch(()=> ({}));
     return data?.output_text || data?.output?.[0]?.content?.[0]?.text || data?.response?.output_text || (typeof data==='string'?data:JSON.stringify(data));
   }
 
-  // util
-  function el(tag,opts={}){
-    const n=document.createElement(tag);
-    if(opts.id) n.id=opts.id;
-    if(opts.class) n.className=opts.class;
-    if(opts.text) n.textContent=opts.text;
-    if(opts.style) n.setAttribute('style',opts.style);
-    return n;
+  // -------- Utils --------
+  function ensure(tag,id){ const n=document.getElementById(id)||document.createElement(tag); n.id=id; return n; }
+  function el(tag,opts={}){ const n=document.createElement(tag); if(opts.class) n.className=opts.class; if(opts.text) n.textContent=opts.text; if(opts.style) n.setAttribute('style',opts.style); return n; }
+  function fnText(t,p){ return (typeof t==='function')? t(p): t; }
+
+  function hideLegacyInputs(){
+    // Hide obvious stray input near hero so we use our own
+    const candidates = Array.from(document.querySelectorAll('input[type="text"], textarea')).filter(x=>!['alx-input'].includes(x.id));
+    if(candidates.length===1){ candidates[0].style.display='none'; }
+  }
+  function findStartButton(){
+    // Try common IDs or a button with text 'Get Started'
+    return document.querySelector('#startChatBtn') ||
+           Array.from(document.querySelectorAll('button,a')).find(b=>/get started/i.test(b.textContent||''));
   }
 })();
