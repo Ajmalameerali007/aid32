@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aidlex Ai Assistant</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="aidlex-enhance.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aidlex Ai Assistant</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-    <div id="start-screen">
-        <div class="logo-container">
-            <h1 class="logo-text">Aidlex Ai</h1>
-        </div>
-        <p class="tagline">Provides all UAE government-related service assistance</p>
-        <button id="get-started-btn">Get Started</button>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo-anim">Aidlex Ai</span>
+      <small>UAE government–related service assistance</small>
     </div>
+    <button id="exitHome" class="btn ghost">Exit → Home</button>
+  </header>
 
-    <div id="chat-container" class="hidden">
-        
-        <div id="chat-header">
-            <div class="header-content">
-                <h3>Aidlex Ai Assistant</h3>
-                <div class="theme-switch-wrapper">
-                    <label class="theme-switch" for="dark-mode-toggle">
-                        <input type="checkbox" id="dark-mode-toggle" />
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
+  <!-- Landing -->
+  <section id="landing" class="screen center">
+    <h1 class="hero">
+      <span class="typing">Aidlex Ai</span>
+    </h1>
+    <p class="sub">Provides all UAE government–related service assistance</p>
+    <button id="getStarted" class="btn primary">Get Started</button>
+  </section>
 
-        <div id="chat-messages">
-            </div>
+  <!-- Intake: basic profile -->
+  <section id="profile" class="screen center hidden">
+    <h2>Let’s get to know you</h2>
+    <form id="profileForm" class="form">
+      <input id="name" type="text" placeholder="Your Name" required />
+      <input id="email" type="email" placeholder="Your Email" required />
+      <input id="phone" type="tel" placeholder="Phone Number (Optional)" />
+      <button class="btn primary" type="submit">Continue</button>
+    </form>
+  </section>
 
-        <div id="chat-input-area">
-            </div>
+  <!-- Services -->
+  <section id="services" class="screen hidden">
+    <h2>Select a category</h2>
+    <div id="serviceGrid" class="grid"></div>
+  </section>
 
+  <!-- Chat -->
+  <section id="chat" class="screen hidden">
+    <h2 class="chat-title">Aidlex Ai Assistant</h2>
+    <div id="messages" class="messages"></div>
+    <div class="inputRow">
+      <textarea id="chatInput" rows="2" placeholder="Type here…"></textarea>
+      <button id="sendBtn" class="btn primary">Send</button>
     </div>
+  </section>
 
-    <script src="script.js"></script>
-  <script src="aidlex-enhance.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
