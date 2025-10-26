@@ -1,0 +1,7 @@
+# dependencies
+node_modules/
+# secrets
+.env
+# OS/editor
+.DS_Store
+Thumbs.db
