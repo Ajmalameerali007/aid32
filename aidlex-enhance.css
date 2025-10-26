@@ -1,0 +1,16 @@
+:root{ --bg:#0e1013; --card:#171a1f; --text:#e7e7ea; --muted:#9aa4b2; --accent:#0ea5e9; }
+#alx-shell{position:fixed;inset:0;pointer-events:none}
+#alx-shell *{box-sizing:border-box}
+#alx-home{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);pointer-events:auto;z-index:9998}
+.alx-card{background:var(--card);color:var(--text);border:1px solid #2a2f36;border-radius:16px;padding:18px;max-width:960px;width:92vw;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.alx-title{font-size:22px;margin:0 0 10px}
+.alx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.alx-chip{background:#13161b;border:1px solid #2a2f36;border-radius:12px;padding:10px;cursor:pointer;text-align:left}
+.alx-chip:hover{border-color:#3a414a}
+.alx-sub{font-size:12px;color:var(--muted);margin-top:6px}
+#alx-exit{position:fixed;top:12px;right:12px;z-index:9999;padding:10px 14px;border:1px solid #2a2f36;border-radius:10px;background:#121418;color:#fff;pointer-events:auto}
+.alx-msg{max-width:820px;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #2a2f36;background:#13161b}
+.alx-user{background:#0f1216}
+.alx-toolbar{display:flex;gap:8px;margin-top:8px}
+.alx-btn{padding:8px 10px;border:1px solid #2a2f36;border-radius:10px;background:#0f1216;color:#fff;cursor:pointer}
+.alx-btn:hover{border-color:#3a414a}
