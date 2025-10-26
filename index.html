@@ -4,53 +4,87 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aidlex Ai Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: "#0e1013",
+            card: "#171a1f",
+            border: "#2a2f36",
+            text: "#e7e7ea",
+            muted: "#9aa4b2",
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo-anim">Aidlex Ai</span>
-      <small>UAE government–related service assistance</small>
+<body class="bg-bg text-text min-h-screen">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-50 bg-bg/80 backdrop-blur border-b border-border">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="leading-tight">
+        <div class="font-semibold tracking-wide">Aidlex Ai</div>
+        <div class="text-muted text-xs">UAE government–related service assistance</div>
+      </div>
+      <button id="exitHome" class="px-3 py-2 rounded-xl border border-border bg-card hover:border-white/30">Exit → Home</button>
     </div>
-    <button id="exitHome" class="btn ghost">Exit → Home</button>
   </header>
 
   <!-- Landing -->
-  <section id="landing" class="screen center">
-    <h1 class="hero">
-      <span class="typing">Aidlex Ai</span>
+  <section id="landing" class="max-w-5xl mx-auto px-4 py-16 flex flex-col items-center text-center">
+    <h1 class="text-5xl md:text-6xl font-bold mb-3">
+      <span class="inline-block whitespace-nowrap overflow-hidden border-r-2 pr-1"
+            style="animation: typing 2.2s steps(10,end), blink 1s step-end infinite;">
+        Aidlex Ai
+      </span>
     </h1>
-    <p class="sub">Provides all UAE government–related service assistance</p>
-    <button id="getStarted" class="btn primary">Get Started</button>
+    <p class="text-muted mb-6">Provides all UAE government–related service assistance</p>
+    <button id="getStarted" class="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow">
+      Get Started
+    </button>
   </section>
 
-  <!-- Intake: basic profile -->
-  <section id="profile" class="screen center hidden">
-    <h2>Let’s get to know you</h2>
-    <form id="profileForm" class="form">
-      <input id="name" type="text" placeholder="Your Name" required />
-      <input id="email" type="email" placeholder="Your Email" required />
-      <input id="phone" type="tel" placeholder="Phone Number (Optional)" />
-      <button class="btn primary" type="submit">Continue</button>
+  <!-- Profile -->
+  <section id="profile" class="hidden max-w-5xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-semibold mb-4">Let’s get to know you</h2>
+    <form id="profileForm" class="grid gap-3 max-w-xl">
+      <input id="name"  class="px-4 py-3 rounded-xl bg-card border border-border"   type="text"  placeholder="Your Name" required />
+      <input id="email" class="px-4 py-3 rounded-xl bg-card border border-border"   type="email" placeholder="Your Email" required />
+      <input id="phone" class="px-4 py-3 rounded-xl bg-card border border-border"   type="tel"   placeholder="Phone Number (Optional)" />
+      <button class="mt-2 px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow" type="submit">
+        Continue
+      </button>
     </form>
   </section>
 
   <!-- Services -->
-  <section id="services" class="screen hidden">
-    <h2>Select a category</h2>
-    <div id="serviceGrid" class="grid"></div>
+  <section id="services" class="hidden max-w-5xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-semibold mb-4">Select a category</h2>
+    <div id="serviceGrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
   </section>
 
   <!-- Chat -->
-  <section id="chat" class="screen hidden">
-    <h2 class="chat-title">Aidlex Ai Assistant</h2>
-    <div id="messages" class="messages"></div>
-    <div class="inputRow">
-      <textarea id="chatInput" rows="2" placeholder="Type here…"></textarea>
-      <button id="sendBtn" class="btn primary">Send</button>
+  <section id="chat" class="hidden max-w-5xl mx-auto px-4 py-6">
+    <h2 class="text-xl font-semibold text-center mb-3">Aidlex Ai Assistant</h2>
+    <div id="messages" class="max-h-[62vh] overflow-auto"></div>
+    <div class="mt-3 flex gap-2 items-end">
+      <textarea id="chatInput" rows="2"
+        class="flex-1 px-4 py-3 rounded-xl bg-card border border-border"
+        placeholder="Type here…"></textarea>
+      <button id="sendBtn" class="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow">
+        Send
+      </button>
     </div>
   </section>
 
-  <script src="script.js"></script>
+  <style>
+    @keyframes typing { from { width: 0 } to { width: 9ch } }
+    @keyframes blink  { 50% { border-color: transparent } }
+  </style>
+
+  <script src="script.js?v=2"></script>
 </body>
 </html>
