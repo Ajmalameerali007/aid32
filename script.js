@@ -54,8 +54,11 @@ function buildServiceGrid(){
   serviceGrid.innerHTML=''; 
   SERVICES.forEach(s=>{
     const card = document.createElement('button');
-    card.className = 'card text-left';
-    card.innerHTML = `<h3 class="font-semibold">${s.title}</h3><p class="text-muted text-sm">${s.subs}</p>`;
+    card.className = 'w-full text-left px-4 py-4 rounded-2xl border border-border bg-card/80 hover:bg-card hover:border-white/40 transition focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-bg';
+    card.innerHTML = `
+      <h3 class="font-semibold text-base">${s.title}</h3>
+      <p class="text-muted text-sm leading-relaxed">${s.subs}</p>
+    `;
     card.onclick = ()=> selectService(s);
     serviceGrid.appendChild(card);
   });
@@ -65,11 +68,14 @@ function selectService(svc){ selectedService = svc; startIntake(); show(chat); }
 // Chat
 function addMessage(text, role='assistant', tools=false){
   const div = document.createElement('div');
-  div.className = `msg ${role==='user'?'bg-[#0f1216]':''} border border-border rounded-xl p-3 my-2`;
+  const base = 'border border-border rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap backdrop-blur';
+  const assistant = 'bg-card/90 text-text';
+  const user = 'bg-[#0f1216] text-white border-white/20';
+  div.className = `${base} ${role==='user'?user:assistant}`;
   div.textContent = text;
   messagesEl.appendChild(div);
   if (role==='assistant' && tools){
-    const bar = document.createElement('div'); bar.className='flex gap-2 mt-2';
+    const bar = document.createElement('div'); bar.className='flex flex-wrap gap-2 mt-3';
     const copy = toolBtn('Copy', ()=> navigator.clipboard.writeText(text));
     const speak= toolBtn('Read aloud', ()=> tts(text));
     bar.append(copy, speak); div.appendChild(bar);
@@ -78,7 +84,7 @@ function addMessage(text, role='assistant', tools=false){
 }
 function toolBtn(label, fn){
   const b=document.createElement('button');
-  b.className='px-3 py-2 rounded-xl border border-border bg-card hover:border-white/30';
+  b.className='px-3 py-2 rounded-xl border border-border bg-card/80 hover:bg-card hover:border-white/40 transition text-sm';
   b.textContent=label; b.onclick=fn; return b;
 }
 sendBtn.addEventListener('click', onSend);
@@ -90,7 +96,7 @@ function onSend(){
     answers[QUESTIONS[qIndex].key]=text; qIndex++; askNext();
   }else{
     callAgent(text).then(r=> addMessage(r||'', 'assistant', true))
-                   .catch(err=> addMessage('Error: '+err, 'assistant', false));
+                   .catch(err=> addMessage(formatError(err), 'assistant', false));
   }
 }
 
@@ -105,7 +111,7 @@ function askNext(){
     const summary = buildSummary();
     addMessage('Thanks. Preparing your guidance…','assistant',false);
     callAgent(summary).then(r=>{ addMessage(r||'','assistant',true); renderActions(); })
-                      .catch(e=>{ addMessage('Error: '+e,'assistant',false); renderActions(); });
+                      .catch(e=>{ addMessage(formatError(e),'assistant',false); renderActions(); });
   }
 }
 function buildSummary(){
@@ -123,21 +129,51 @@ function buildSummary(){
   ].join('\\n');
 }
 function renderActions(){
-  const bar = document.createElement('div'); bar.className='flex gap-2 mt-2';
+  const bar = document.createElement('div');
+  bar.className='flex flex-wrap gap-2 justify-start';
   bar.append(
     toolBtn('Book appointment', ()=> addMessage('Please share a preferred time and your contact.','assistant',false)),
     toolBtn('New case', ()=> { show(services); resetChat(); }),
     toolBtn('Exit → Home', ()=> { resetAll(); show(landing); })
   );
-  messagesEl.appendChild(bar); messagesEl.scrollTop = messagesEl.scrollHeight;
+  const wrapper = document.createElement('div');
+  wrapper.className='border border-border rounded-2xl px-4 py-3 bg-card/70 backdrop-blur flex flex-wrap gap-2';
+  wrapper.appendChild(bar);
+  messagesEl.appendChild(wrapper);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 // Agent call
 async function callAgent(userMessage){
-  const composed = [`SYSTEM CONTEXT: ${selectedService.prompt}`, '', userMessage].join('\\n');
-  const r = await fetch('/.netlify/functions/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message: composed})});
-  const data = await r.json().catch(()=> ({}));
+  const context = selectedService
+    ? `${selectedService.prompt} Focus on ${selectedService.title} services.`
+    : 'You are a UAE government services assistant. Give clear, step-by-step guidance.';
+  const payload = {
+    messages: [
+      { role: 'system', content: [{ type: 'text', text: context }] },
+      { role: 'user', content: [{ type: 'text', text: userMessage }] }
+    ]
+  };
+  const r = await fetch('/.netlify/functions/aidlex',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  const raw = await r.text();
+  let data;
+  try{ data = raw ? JSON.parse(raw) : {}; }catch(_){ throw new Error(`Invalid response (${r.status})`); }
+  if(!r.ok){
+    const msg = data?.error?.message || data?.message || `Request failed (${r.status})`;
+    throw new Error(msg);
+  }
   return data?.output_text || data?.output?.[0]?.content?.[0]?.text || data?.response?.output_text || (typeof data==='string'?data:JSON.stringify(data));
+}
+
+function formatError(err){
+  if(!err) return 'An unknown error occurred.';
+  if(err instanceof Error) return `Error: ${err.message}`;
+  if(typeof err === 'string') return `Error: ${err}`;
+  return 'Error: Unable to complete the request.';
 }
 
 // TTS (female-ish)
