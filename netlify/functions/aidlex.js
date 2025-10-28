@@ -5,9 +5,13 @@ export async function handler(event) {
     }
 
     const body = JSON.parse(event.body || "{}");
-    const messages = body.messages || [];
+    let { messages } = body;
+    const singleMessage = typeof body.message === "string" ? body.message.trim() : "";
     if (!Array.isArray(messages) || messages.length === 0) {
-      return { statusCode: 400, body: "Missing 'messages'[]" };
+      messages = singleMessage ? [{ role: "user", content: [{ type: "text", text: singleMessage }] }] : [];
+    }
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return { statusCode: 400, body: JSON.stringify({ error: { message: "Missing messages" } }) };
     }
 
     const resp = await fetch("https://api.openai.com/v1/responses", {
@@ -34,6 +38,6 @@ export async function handler(event) {
       body: text
     };
   } catch (err) {
-    return { statusCode: 500, body: String(err) };
+    return { statusCode: 500, body: JSON.stringify({ error: { message: String(err) } }) };
   }
 }
