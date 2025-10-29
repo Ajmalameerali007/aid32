@@ -41,6 +41,8 @@ const clearFilesBtn = $('#clearFiles');
 const exportMemoPdfBtn = $('#exportMemoPdf');
 const exportMemoWordBtn = $('#exportMemoWord');
 const memoOutputSection = $('#memoOutput');
+const templateList = $('#templateList');
+const opsList = $('#opsList');
 
 const state = {
   selectedService: null,
@@ -89,6 +91,34 @@ const SERVICES = [
       'You are Aidlex.AE – a fine-tuned UAE legal drafting copilot specialised in Dubai Courts Arabic pleadings. ' +
       'Maintain legal accuracy, cite Articles by number/year/title only, produce Arabic in Modern Standard Arabic with Emirati court tone. ' +
       'Return structured answers with headings, bilingual guidance, evidence reminders, and compliance warnings. ',
+  },
+  {
+    id: 'government-requests',
+    clusterId: 'government',
+    title: 'Official Requests & Complaints',
+    subtitle: 'Ministries • Regulators • Free zones',
+    summary:
+      'Compose bilingual petitions, escalation letters, and certification-ready attachments for UAE ministries and regulators.',
+    guardrails: [
+      'Scope: UAE ministries, free zones, police licensing, Central Bank, and municipal authorities.',
+      'Capture recipient entity, department, and reference numbers (licence, case, ticket).',
+      'Arabic block must include ministry salutation, subject line centred, and signature spacing 6 lines.',
+      'List attachments with certification status (original, notarised, legal translation, attested).',
+      'Highlight evidence expectations (bank proofs, inspection photos, complaint forms).',
+    ],
+    evidence: [
+      'Official IDs, trade licences, or establishment cards.',
+      'Supporting exhibits (bank statements, inspection photos, contracts) with Arabic translations.',
+      'Copies of prior correspondence or complaint references.',
+      'Authority-specific forms (e.g., SEDD, DED, MOHRE) completed and signed.',
+      'Proof of payment or fee receipts when required.',
+    ],
+    tags: ['correspondence', 'uae', 'complaint'],
+    memoEnabled: true,
+    translationEnabled: true,
+    systemPrompt:
+      'You are Aidlex.AE – UAE government correspondence architect. Produce bilingual letters, escalation plans, and evidence '
+      + 'matrices aligned with ministry formatting, Arabic salutations, and certification notes. ',
   },
   {
     id: 'mohre-wages',
@@ -216,6 +246,20 @@ const SERVICE_CLUSTERS = [
     services: ['dubai-court-memo', 'tenancy-rdc'],
   },
   {
+    id: 'government',
+    title: 'Government Petitions Hub',
+    subtitle: 'Ministries • Regulators • Escalations',
+    description:
+      'Streamline official complaint drafting, evidence annexing, and bilingual ministry routing with consistent formatting.',
+    availability: 'Response hours 08:00 – 20:00 GST',
+    habits: [
+      '08:30 ministry portal sweep with checklist sync and hydration reminder.',
+      '14:00 attachment audit: notarisation + legal translation confirmations.',
+      '19:00 send bilingual recap with evidence gaps and next approvals.',
+    ],
+    services: ['government-requests'],
+  },
+  {
     id: 'employment',
     title: 'Employment & MOHRE Care',
     subtitle: 'Wage claims • Settlements • Tasheel routing',
@@ -272,6 +316,17 @@ const HABIT_TRACKS = [
     ],
   },
   {
+    title: 'Regulatory Alignment Pulse',
+    focus: 'Official correspondence & certifications',
+    availability: '10:00 – 13:00 GST',
+    energy: 'Precise • Diplomatic',
+    steps: [
+      'Confirm authority requirements (subject line, salutations, annex index).',
+      'Review translation queue and attestations for pending attachments.',
+      'Log status updates with “as-of” dates for every regulator touchpoint.',
+    ],
+  },
+  {
     title: 'Midday Evidence Sprint',
     focus: 'Attachments & certification',
     availability: '12:00 – 15:00 GST',
@@ -313,6 +368,14 @@ const KB_ARTICLES = [
     jurisdiction: ['UAE', 'MOHRE'],
   },
   {
+    id: 'kb-official-complaint',
+    title: 'UAE Official Complaint Letter Template (EN/AR)',
+    summary: 'Structured bilingual request letter with ministry salutations, attachments index, and certification reminders.',
+    path: 'kb/templates/correspondence__official-complaint__uae__v20250105.md',
+    tags: ['correspondence', 'uae', 'template'],
+    jurisdiction: ['UAE', 'Federal'],
+  },
+  {
     id: 'kb-dubai-memo-template',
     title: 'Dubai Courts Memorandum Template (EN/AR)',
     summary: 'Sample bilingual pleading structure with salutations, spacing, annexures, and signature blocks.',
@@ -338,6 +401,87 @@ const KB_ARTICLES = [
   },
 ];
 
+const ANSWER_TEMPLATES = [
+  {
+    id: 'clarification',
+    title: 'Clarification Stub',
+    description: 'Always confirm role, emirate, dates, desired outcome, and evidence before drafting. Close with one follow-up question.',
+    english:
+      'Thanks for sharing this. To ensure I tailor the guidance, could you confirm your role, the emirate/forum handling the matter, key dates/deadlines, desired outcome, and what evidence you already have? What is the most urgent decision you need help with next?',
+    arabic:
+      'شكرًا لك على المعلومات. للتأكد من أن التوجيه مناسب، هل يمكنك توضيح صفتك، والإمارة/الجهة المختصة، والتواريخ أو المهل المهمة، والنتيجة المطلوبة، وما المستندات أو الأدلة المتوفرة لديك؟ ما القرار العاجل الذي تحتاج المساعدة بشأنه الآن؟',
+  },
+  {
+    id: 'outlook',
+    title: 'Outlook Block',
+    description: 'Summaries with timelines and next steps, then invite to continue collaborating.',
+    english:
+      '**Outlook**\n• Timeline: ___\n• Likely path: ___\n• Risk flags: ___\n\n**Next Steps (1–3)**\n1. ___\n2. ___\n3. ___\n\nLet me know when you are ready for the next milestone—I can draft the bilingual memo or notices for you.',
+    arabic:
+      '**نظرة عامة**\n• الجدول الزمني: ___\n• المسار المتوقع: ___\n• عوامل المخاطر: ___\n\n**الخطوات التالية (١–٣)**\n١. ___\n٢. ___\n٣. ___\n\nأخبرني عندما تكون مستعدًا للخطوة التالية، لأقوم بصياغة المذكرة أو الإشعارات الثنائية اللغة نيابةً عنك.',
+  },
+  {
+    id: 'premium',
+    title: 'Premium Block (Passcode 4868)',
+    description: 'Use only after client shares passcode. Provide numbered steps with bilingual micro-samples and disclaimer.',
+    english:
+      'Premium Access confirmed (4868).\n1. Step name — include EN micro-sample: “...”\n2. Step name — attach AR micro-sample: “...”\n3. Step name — note certifications/evidence.\n\n_Premium drafting is subject to legal review. Confirm acceptance before filing._',
+    arabic:
+      'تم تأكيد الوصول المميز (٤٨٦٨).\n١. اسم الخطوة — أدرج مثالًا مختصرًا بالإنجليزية: «…»\n٢. اسم الخطوة — أرفق مثالًا مختصرًا بالعربية: «…»\n٣. اسم الخطوة — وضّح التصديقات/الأدلة المطلوبة.\n\n_الصياغة المميزة تخضع لمراجعة قانونية. يرجى تأكيد الموافقة قبل التقديم._',
+  },
+];
+
+const OPS_GOVERNANCE = [
+  {
+    title: 'Scope & Guardrails',
+    points: [
+      'Limit corpus to supported workflows (RDC, MOHRE, traffic, DIFC/ADGM, VAT, eCrime).',
+      'Document types: procedures, checklists, portal how-tos, templates, FAQs, glossary.',
+      'Include “as-of” dates and jurisdiction tags for every file.',
+    ],
+  },
+  {
+    title: 'Information Architecture',
+    points: [
+      'Foldering: /procedures/{domain}/{emirate}, /templates, /faq, /glossary, /citations, /change-log.',
+      'File names follow domain__topic__jurisdiction__vYYYYMMDD.md (≤1 topic per file).',
+      'Keep files under 2,000 words—link instead of duplicating content.',
+    ],
+  },
+  {
+    title: 'Authoring Format',
+    points: [
+      'JSON front-matter at top of file with title, jurisdiction, language, version, tags, audience.',
+      'Body order: Summary, Eligibility, Step-by-Step, Docs Checklist, Fees & Timelines, Common Pitfalls, References.',
+      'Always provide English then — — — separator then Arabic equivalent.',
+    ],
+  },
+  {
+    title: 'Metadata & Retrieval',
+    points: [
+      'Chunk 350–550 tokens with 50–80 overlap.',
+      'Embed jurisdiction, tags, version, as_of, audience into chunk metadata.',
+      'Add 2–5 QA exemplars per file to boost search relevance.',
+    ],
+  },
+  {
+    title: 'Quality Gates',
+    points: [
+      '4-eyes review: content editor + legal reviewer sign-off.',
+      'Red-flag pass to catch outdated fees or portals.',
+      'No statute quotes—cite only Article number, year, title.',
+    ],
+  },
+  {
+    title: 'Governance & Updates',
+    points: [
+      'Monthly sweeps per domain to confirm portals/fees.',
+      'Bump version and log 1-line entry in /change-log/CHANGELOG.md when updating.',
+      'Archive stale files and exclude them from vector stores.',
+    ],
+  },
+];
+
 init();
 
 function init() {
@@ -345,6 +489,8 @@ function init() {
   renderKbFilters();
   renderKbList();
   renderHabitBoard();
+  renderAnswerTemplates();
+  renderOpsGovernance();
   connectParticles();
   setupVoiceControls();
   setupUploadCenter();
@@ -376,6 +522,9 @@ function init() {
   apiForm.addEventListener('submit', onApiSubmit);
   if (state.sessionKey) {
     appendSystemToast('Session key loaded from cache.');
+  }
+  if (templateList) {
+    templateList.addEventListener('click', handleTemplateCopy);
   }
 }
 
@@ -488,6 +637,83 @@ function renderHabitBoard() {
     });
     habitList.appendChild(card);
   });
+}
+
+function renderAnswerTemplates() {
+  if (!templateList) return;
+  templateList.innerHTML = '';
+  ANSWER_TEMPLATES.forEach((template) => {
+    const card = document.createElement('article');
+    card.className = 'glass-panel bg-black/40 border border-white/10 rounded-3xl p-5 space-y-3';
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-sky-200">${template.title}</p>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">${template.description}</p>
+        </div>
+        <button type="button" data-copy-template="${template.id}" class="px-3 py-1.5 rounded-full border border-white/15 text-[11px] uppercase tracking-[0.25em] text-slate-200 hover:border-cyan-400/60 hover:text-white transition">Copy</button>
+      </div>
+      <div class="text-sm text-slate-100 bg-white/5 border border-white/10 rounded-2xl p-3 whitespace-pre-wrap">${sanitize(
+        template.english
+      )}</div>
+      <div class="text-sm text-slate-100 bg-white/5 border border-white/10 rounded-2xl p-3 rtl-preview whitespace-pre-wrap">${sanitize(
+        template.arabic
+      )}</div>
+    `;
+    templateList.appendChild(card);
+  });
+}
+
+function handleTemplateCopy(event) {
+  const target = event.target;
+  if (!target?.dataset?.copyTemplate) return;
+  const template = ANSWER_TEMPLATES.find((item) => item.id === target.dataset.copyTemplate);
+  if (!template) return;
+  const payload = `${template.english}\n— — —\n${template.arabic}`;
+  copyToClipboard(payload)
+    .then(() => appendSystemToast(`${template.title} copied.`))
+    .catch(() => appendSystemToast('Clipboard unavailable. Select text manually.'));
+}
+
+function renderOpsGovernance() {
+  if (!opsList) return;
+  opsList.innerHTML = '';
+  OPS_GOVERNANCE.forEach((entry) => {
+    const card = document.createElement('article');
+    card.className = 'glass-panel bg-black/40 border border-white/10 rounded-3xl p-5 space-y-3';
+    card.innerHTML = `
+      <p class="text-xs uppercase tracking-[0.3em] text-emerald-200">${entry.title}</p>
+      <ul class="space-y-2 text-xs text-slate-300 list-disc list-inside"></ul>
+    `;
+    const list = card.querySelector('ul');
+    entry.points.forEach((point) => {
+      const li = document.createElement('li');
+      li.textContent = point;
+      list.appendChild(li);
+    });
+    opsList.appendChild(card);
+  });
+}
+
+function copyToClipboard(text) {
+  if (navigator?.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    return Promise.resolve();
+  } catch (error) {
+    return Promise.reject(error);
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 function setupVoiceControls() {
