@@ -1,90 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aidlex Ai Assistant</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIDLEX.AE • Government Intelligence Copilot</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            bg: "#0e1013",
-            card: "#171a1f",
-            border: "#2a2f36",
-            text: "#e7e7ea",
-            muted: "#9aa4b2",
-          }
-        }
-      }
-    }
-  </script>
-</head>
-<body class="bg-bg text-text min-h-screen">
-  <!-- Topbar -->
-  <header class="sticky top-0 z-50 bg-bg/80 backdrop-blur border-b border-border">
-    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="leading-tight">
-        <div class="font-semibold tracking-wide">Aidlex Ai</div>
-        <div class="text-muted text-xs">UAE government–related service assistance</div>
-      </div>
-      <button id="exitHome" class="px-3 py-2 rounded-xl border border-border bg-card hover:border-white/30">Exit → Home</button>
-    </div>
-  </header>
-
-  <!-- Landing -->
-  <section id="landing" class="max-w-5xl mx-auto px-4 py-16 flex flex-col items-center text-center">
-    <h1 class="text-5xl md:text-6xl font-bold mb-3">
-      <span class="inline-block whitespace-nowrap overflow-hidden border-r-2 pr-1"
-            style="animation: typing 2.2s steps(10,end), blink 1s step-end infinite;">
-        Aidlex Ai
-      </span>
-    </h1>
-    <p class="text-muted mb-6">Provides all UAE government–related service assistance</p>
-    <button id="getStarted" class="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow">
-      Get Started
-    </button>
-  </section>
-
-  <!-- Profile -->
-  <section id="profile" class="hidden max-w-5xl mx-auto px-4 py-10">
-    <h2 class="text-2xl font-semibold mb-4">Let’s get to know you</h2>
-    <form id="profileForm" class="grid gap-3 max-w-xl">
-      <input id="name"  class="px-4 py-3 rounded-xl bg-card border border-border"   type="text"  placeholder="Your Name" required />
-      <input id="email" class="px-4 py-3 rounded-xl bg-card border border-border"   type="email" placeholder="Your Email" required />
-      <input id="phone" class="px-4 py-3 rounded-xl bg-card border border-border"   type="tel"   placeholder="Phone Number (Optional)" />
-      <button class="mt-2 px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow" type="submit">
-        Continue
-      </button>
-    </form>
-  </section>
-
-  <!-- Services -->
-  <section id="services" class="hidden max-w-5xl mx-auto px-4 py-10">
-    <h2 class="text-2xl font-semibold mb-4">Select a category</h2>
-    <div id="serviceGrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
-  </section>
-
-  <!-- Chat -->
-  <section id="chat" class="hidden max-w-5xl mx-auto px-4 py-6">
-    <h2 class="text-xl font-semibold text-center mb-3">Aidlex Ai Assistant</h2>
-    <div id="messages" class="max-h-[62vh] overflow-auto"></div>
-    <div class="mt-3 flex gap-2 items-end">
-      <textarea id="chatInput" rows="2"
-        class="flex-1 px-4 py-3 rounded-xl bg-card border border-border"
-        placeholder="Type here…"></textarea>
-      <button id="sendBtn" class="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow">
-        Send
-      </button>
-    </div>
-  </section>
-
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.4.1/docx.umd.min.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @keyframes typing { from { width: 0 } to { width: 9ch } }
-    @keyframes blink  { 50% { border-color: transparent } }
-  </style>
+    :root {
+      color-scheme: dark;
+    }
 
-  <script src="script.js?v=2"></script>
+    body {
+      background-color: #050507;
+      font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.45);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(129, 140, 248, 0.85));
+      border-radius: 999px;
+    }
+
+    .typewriter h1 {
+      overflow: hidden;
+      border-right: .15em solid rgba(255, 255, 255, 0.55);
+      white-space: nowrap;
+      margin: 0 auto;
+      letter-spacing: .12em;
+      animation: typing 3s steps(40, end) forwards, blink-caret 1s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: rgba(255, 255, 255, 0.45); }
+    }
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .service-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.85rem 1.35rem;
+      border-radius: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: white;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border 0.25s ease;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.3), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .service-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 35px rgba(14, 116, 144, 0.25);
+      border-color: rgba(94, 234, 212, 0.35);
+    }
+
+    .service-btn:hover::after,
+    .service-btn.active::after {
+      opacity: 1;
+    }
+
+    .service-btn.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(94, 234, 212, 0.65);
+      box-shadow: 0 25px 40px rgba(14, 116, 144, 0.28);
+    }
+
+    .glass-panel {
+      background: rgba(10, 17, 35, 0.68);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(2, 6, 23, 0.45);
+      backdrop-filter: blur(26px);
+    }
+
+    .rtl-preview {
+      direction: rtl;
+      text-align: justify;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      font-family: 'Tajawal', 'Cairo', 'Amiri', system-ui;
+    }
+
+    .modal-hidden { display: none; }
+  </style>
+</head>
+<body class="relative min-h-screen text-slate-100">
+  <div id="tsparticles" class="absolute inset-0 -z-10"></div>
+
+  <main class="relative min-h-screen w-full px-4 py-10 md:px-10">
+    <section id="intro" class="max-w-5xl mx-auto text-center fade-in" style="animation-delay: 0.3s">
+      <div class="typewriter">
+        <h1 class="text-2xl md:text-4xl font-extrabold tracking-[0.35em]">WELCOME TO AIDLEX.AE</h1>
+      </div>
+      <p class="mt-4 text-slate-300 text-base md:text-lg font-light fade-in" style="animation-delay: 3.3s">AI-Powered UAE Legal & Government Intelligence • Fine-tuned Copilot for Courts, MOHRE, Tenancy & More</p>
+      <p class="mt-2 text-slate-400 text-sm md:text-base fade-in" style="animation-delay: 3.8s">Structured bilingual workflows, authenticated memo drafting, certified translation guidance, and proactive evidence mapping.</p>
+    </section>
+
+    <section id="services" class="max-w-6xl mx-auto mt-12 fade-in" style="animation-delay: 4.2s">
+      <h2 class="text-lg uppercase tracking-[0.45em] text-slate-400 text-center mb-3">Mission Workflows</h2>
+      <p class="text-center text-sm text-slate-400 max-w-3xl mx-auto">Curated pods bundle related services, rituals, and guardrails so teams can focus on human conversations instead of hunting menus.</p>
+      <div id="serviceGrid" class="mt-6 space-y-5"></div>
+    </section>
+
+    <section id="habits" class="max-w-6xl mx-auto mt-10 fade-in" style="animation-delay: 4.6s">
+      <div class="glass-panel p-6 md:p-10 space-y-6">
+        <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <h3 class="text-lg uppercase tracking-[0.35em] text-slate-400">Humanized Productivity Rituals</h3>
+            <p class="mt-3 text-sm text-slate-300 max-w-3xl">Anchor your legal ops flow with mindful check-ins, bilingual follow-through, and energy cues tuned for high-touch service moments.</p>
+          </div>
+          <div class="text-xs text-slate-400 uppercase tracking-[0.25em]">Availability: 06:30 – 22:00 GST • Hybrid & Remote Teams</div>
+        </header>
+        <div id="habitList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+    <section id="actions" class="max-w-2xl mx-auto mt-8 fade-in hidden" style="animation-delay: 4.8s">
+      <div class="flex justify-center gap-4 flex-wrap">
+        <button id="connectKey" class="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-medium text-base backdrop-blur hover:bg-white hover:text-black transition">Connect OpenAI Tenant</button>
+        <a href="#login" class="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-medium text-base backdrop-blur hover:bg-white hover:text-black transition">Login</a>
+        <a href="#signup" class="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-medium text-base backdrop-blur hover:bg-white hover:text-black transition">Sign Up</a>
+      </div>
+      <div class="mt-4 text-center">
+        <a href="#guest" class="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-medium text-base backdrop-blur hover:bg-white hover:text-black transition">Continue as Guest</a>
+      </div>
+    </section>
+
+    <section id="workflow" class="max-w-6xl mx-auto mt-14 glass-panel p-6 md:p-10 space-y-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Active Workflow</p>
+          <h3 id="workflowTitle" class="text-2xl font-semibold text-white mt-2">Select a workflow to begin</h3>
+          <p id="workflowSummary" class="text-slate-300 text-sm md:text-base mt-2 max-w-2xl">Choose a mission to unlock guided questions, court-ready memos, and verified document templates.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button id="launchMemo" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-black font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition">Draft Dubai Courts Memo</button>
+          <button id="launchTranslation" class="px-5 py-2 rounded-xl border border-white/20 text-white/90 hover:border-cyan-300/70 transition disabled:opacity-40 disabled:cursor-not-allowed">Legal Translation Studio</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="glass-panel bg-white/5 p-5 rounded-2xl border border-white/10">
+          <h4 class="text-sm uppercase tracking-[0.3em] text-slate-400">Checklist & Guardrails</h4>
+          <ul id="guardrailList" class="mt-4 space-y-3 text-sm text-slate-300">
+            <li class="text-slate-500">Awaiting selection.</li>
+          </ul>
+        </div>
+        <div class="lg:col-span-2 glass-panel bg-white/5 p-5 rounded-2xl border border-white/10">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm uppercase tracking-[0.3em] text-slate-400">Conversation Console</h4>
+            <span id="thinkingBadge" class="hidden text-xs px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 animate-pulse">Connecting to Aidlex Copilot…</span>
+          </div>
+          <div id="chatMessages" class="mt-4 h-64 md:h-80 overflow-y-auto space-y-4 pr-2"></div>
+          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-3">
+            <button id="readAloud" type="button" class="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 hover:border-cyan-300/60 hover:text-white transition">🔊 Read aloud (female voice)</button>
+            <button id="stopReading" type="button" class="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 hover:border-rose-300/60 hover:text-white transition">⏹ Stop reading</button>
+            <button id="startDictation" type="button" class="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 hover:border-emerald-300/60 hover:text-white transition">🎙️ Voice to text</button>
+            <span id="dictationStatus" class="px-3 py-1 rounded-full border border-white/10 bg-black/30">Dictation idle</span>
+          </div>
+          <form id="chatForm" class="mt-4 flex flex-col gap-3">
+            <textarea id="chatInput" rows="2" class="w-full resize-none px-4 py-3 rounded-2xl border border-white/10 bg-black/40 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/30 transition" placeholder="Ask the copilot or share new facts. Shift + Enter for line break."></textarea>
+            <div class="flex flex-wrap items-center gap-3 justify-between">
+              <div class="text-xs text-slate-400">System context: <span id="contextLabel" class="font-medium text-sky-200">Idle</span></div>
+              <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 text-black font-semibold shadow-lg shadow-sky-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition">Send to Copilot</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="glass-panel bg-white/5 p-6 rounded-2xl border border-white/10 xl:col-span-1">
+          <h4 class="text-sm uppercase tracking-[0.3em] text-slate-400">Knowledge Base (EN/AR)</h4>
+          <div id="kbFilters" class="mt-4 flex flex-wrap gap-2"></div>
+          <div id="kbList" class="mt-4 space-y-4 max-h-72 overflow-y-auto pr-2"></div>
+        </div>
+        <div class="glass-panel bg-white/5 p-6 rounded-2xl border border-white/10">
+          <h4 class="text-sm uppercase tracking-[0.3em] text-slate-400">Evidence & Attachments Matrix</h4>
+          <div id="evidenceList" class="mt-4 space-y-4 text-sm text-slate-300 max-h-72 overflow-y-auto pr-2">
+            <p class="text-slate-500">Select a workflow to view curated checklists, evidence prompts, and certification requirements.</p>
+          </div>
+        </div>
+        <div class="glass-panel bg-white/5 p-6 rounded-2xl border border-white/10">
+          <h4 class="text-sm uppercase tracking-[0.3em] text-slate-400">Document Lab & Upload Center</h4>
+          <p class="mt-2 text-xs text-slate-400">Drop PDFs, Word, images, audio, or spreadsheets. We auto-detect language, highlight missing certifications, and queue summaries for the copilot.</p>
+          <label class="mt-4 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-white/15 bg-black/30 py-6 cursor-pointer hover:border-cyan-400/60 transition">
+            <span class="text-sm text-slate-300">Drag & drop or browse files</span>
+            <span class="text-xs text-slate-500">All formats up to 25 MB each</span>
+            <input id="fileUpload" type="file" class="hidden" multiple>
+          </label>
+          <div id="fileList" class="mt-4 space-y-3 max-h-48 overflow-y-auto pr-2 text-sm text-slate-200">
+            <p class="text-slate-500">No files yet. Upload to unlock evidence extraction and translation guidance.</p>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="summarizeFiles" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-black text-sm font-semibold shadow-lg shadow-emerald-500/30">Summarize & send to copilot</button>
+            <button id="clearFiles" type="button" class="px-4 py-2 rounded-xl border border-white/15 text-xs text-slate-300 hover:border-rose-400/60 hover:text-white transition">Clear list</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section id="memoModal" class="fixed inset-0 bg-black/70 backdrop-blur-xl flex items-center justify-center px-4 py-10 modal-hidden">
+    <div class="max-w-4xl w-full glass-panel bg-slate-950/80 border border-white/10 p-6 md:p-8 space-y-6 relative">
+      <button id="closeMemo" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl" aria-label="Close">×</button>
+      <header class="space-y-2">
+        <h3 class="text-2xl font-semibold text-white">Dubai Courts Memorandum Builder</h3>
+        <p class="text-sm text-slate-300">Collect precise facts, map evidence, and produce bilingual (EN ➜ AR) pleadings aligned with UAE court formalities, salutations, spacing, signatures, and annexures.</p>
+      </header>
+      <form id="memoForm" class="grid md:grid-cols-2 gap-4 text-sm text-slate-200">
+        <label class="flex flex-col gap-2">
+          <span>Forum / Division</span>
+          <select name="forum" required class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
+            <option value="Dubai Courts - First Instance">Dubai Courts - First Instance</option>
+            <option value="Dubai Courts - Appeal">Dubai Courts - Appeal</option>
+            <option value="Dubai Courts - Execution">Dubai Courts - Execution</option>
+            <option value="RDC">Rental Disputes Center (RDC)</option>
+            <option value="DIFC Courts">DIFC Courts</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-2">
+          <span>Case Type</span>
+          <select name="caseType" required class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
+            <option value="Cheque Claim">Cheque Claim</option>
+            <option value="Rent Non-Payment">Rent Non-Payment</option>
+            <option value="Employment Wage Claim">Employment Wage Claim</option>
+            <option value="Personal Status">Personal Status / Family</option>
+            <option value="Commercial Dispute">Commercial Dispute</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-2 md:col-span-2">
+          <span>Parties & Roles</span>
+          <textarea name="parties" rows="2" placeholder="Claimant: ...\nRespondent: ...\nCounsel / Representative: ..." required class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <label class="flex flex-col gap-2 md:col-span-2">
+          <span>Facts & Chronology (with dates in YYYY-MM-DD)</span>
+          <textarea name="facts" rows="4" placeholder="2024-05-01 – Tenancy contract signed..." required class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <label class="flex flex-col gap-2 md:col-span-2">
+          <span>Evidence & Exhibits (list each with certification status)</span>
+          <textarea name="evidence" rows="3" placeholder="Exhibit 1 – Tenancy contract (Ejari attested)\nExhibit 2 – Bank statements (Arabic legal translation required)" class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <label class="flex flex-col gap-2">
+          <span>Relief Requested</span>
+          <textarea name="relief" rows="2" placeholder="1. Order respondent to pay..." required class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <label class="flex flex-col gap-2">
+          <span>Special Notes (deadlines, hearings, language preferences)</span>
+          <textarea name="notes" rows="2" class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <button type="submit" class="md:col-span-2 mt-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-500 text-black font-semibold shadow-lg shadow-sky-500/30">Generate bilingual memorandum</button>
+      </form>
+      <section id="memoOutput" class="space-y-4">
+        <div class="text-xs uppercase tracking-[0.3em] text-slate-400">English Draft</div>
+        <article id="memoEnglish" class="text-sm text-slate-200 whitespace-pre-wrap bg-white/5 border border-white/10 rounded-2xl p-4 min-h-[120px]">Provide details to generate the memo.</article>
+        <div class="text-xs uppercase tracking-[0.3em] text-slate-400">Arabic المحكمة</div>
+        <article id="memoArabic" class="text-sm text-slate-100 whitespace-pre-wrap bg-white/5 border border-white/10 rounded-2xl p-4 rtl-preview min-h-[120px]">سيتم عرض المذكرة العربية هنا بصياغة رسمية بعد تعبئة البيانات المطلوبة.</article>
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button id="exportMemoPdf" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-black text-sm font-semibold shadow-lg shadow-sky-500/30">Export PDF</button>
+          <button id="exportMemoWord" type="button" class="px-4 py-2 rounded-xl border border-white/15 text-sm text-slate-200 hover:border-cyan-400/60 hover:text-white transition">Export Word (.docx)</button>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section id="translationModal" class="fixed inset-0 bg-black/70 backdrop-blur-xl flex items-center justify-center px-4 py-10 modal-hidden">
+    <div class="max-w-3xl w-full glass-panel bg-slate-950/80 border border-white/10 p-6 md:p-8 space-y-6 relative">
+      <button id="closeTranslation" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl" aria-label="Close">×</button>
+      <header class="space-y-2">
+        <h3 class="text-2xl font-semibold text-white">Legal Translation Studio</h3>
+        <p class="text-sm text-slate-300">Submit English documents to receive UAE-certified Arabic templates matching bank, cheque, VAT, and wage dispute standards.</p>
+      </header>
+      <form id="translationForm" class="space-y-4 text-sm text-slate-200">
+        <label class="flex flex-col gap-2">
+          <span>Document Type</span>
+          <select name="docType" class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
+            <option value="Bank Statement">Bank Statement</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Employment Contract">Employment Contract</option>
+            <option value="Invoices / VAT">VAT Invoice Pack</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-2">
+          <span>Key Details</span>
+          <textarea name="details" rows="3" placeholder="Include currency, amounts, signatories, certification requirements..." class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40"></textarea>
+        </label>
+        <button type="submit" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-black font-semibold shadow-lg shadow-emerald-500/30">Generate bilingual translation brief</button>
+      </form>
+      <section class="space-y-3">
+        <h4 class="text-xs uppercase tracking-[0.3em] text-slate-400">Preview</h4>
+        <article id="translationPreview" class="text-sm text-slate-200 whitespace-pre-wrap bg-white/5 border border-white/10 rounded-2xl p-4 min-h-[120px]">Awaiting document details…</article>
+      </section>
+    </div>
+  </section>
+
+  <section id="apiModal" class="fixed inset-0 bg-black/70 backdrop-blur-xl flex items-center justify-center px-4 py-10 modal-hidden">
+    <div class="max-w-md w-full glass-panel bg-slate-950/80 border border-white/10 p-6 md:p-8 space-y-5 relative">
+      <button id="closeApi" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl" aria-label="Close">×</button>
+      <h3 class="text-xl font-semibold text-white">Connect your OpenAI Tenant</h3>
+      <p class="text-sm text-slate-300">Deploy with a server key via Netlify (recommended) or paste a temporary session key for local testing. Keys are stored in-memory only.</p>
+      <form id="apiForm" class="space-y-3 text-sm text-slate-200">
+        <label class="flex flex-col gap-2">
+          <span>Session API Key (optional)</span>
+          <input type="password" name="apiKey" class="rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/40" placeholder="sk-..." />
+        </label>
+        <label class="flex items-center gap-2 text-xs text-slate-400">
+          <input type="checkbox" name="remember" class="rounded" />
+          Cache in localStorage for this browser session
+        </label>
+        <button type="submit" class="w-full px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 text-black font-semibold shadow-lg shadow-sky-500/30">Save Connection</button>
+      </form>
+      <p class="text-xs text-slate-500">Serverless endpoint: <code>/.netlify/functions/aidlex</code>. Configure <code>OPENAI_API_KEY</code> and prompt ID for production.</p>
+    </div>
+  </section>
+
+  <script src="script.js" type="module"></script>
 </body>
 </html>
